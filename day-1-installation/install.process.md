@@ -1,94 +1,131 @@
-# Setup Kubernetes on Amazon EKS
+Setup Kubernetes on Amazon EKS
 
-You can follow same procedure in the official  AWS document [Getting started with Amazon EKS – eksctl](https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html)   
+You can follow the same procedure in the official AWS document:
+Getting started with Amazon EKS – eksctl
 
-#### Pre-requisites: 
-  - an EC2 Instance 
+Pre-requisites
 
-#### AWS EKS Setup 
-1. Setup kubectl   
-   a. Download kubectl version 1.20  
-   b. Grant execution permissions to kubectl executable   
-   c. Move kubectl onto /usr/local/bin   
-   d. Test that your kubectl installation was successful    
-   ```sh 
-   curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
-   chmod +x ./kubectl
-   mv ./kubectl /usr/local/bin 
-   kubectl version --short --client
-   ```
-2. Setup eksctl   
-   a. Download and extract the latest release   
-   b. Move the extracted binary to /usr/local/bin   
-   c. Test that your eksclt installation was successful   
-   ```sh
-   curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
-   sudo mv /tmp/eksctl /usr/local/bin
-   eksctl version
-   ```
-  
-3. Create an IAM Role and attache it to EC2 instance    
-   `Note: create IAM user with programmatic access if your bootstrap system is outside of AWS`   
-   IAM user should have access to   
-   IAM   
-   EC2   
-   VPC    
-   CloudFormation
+An EC2 Instance
 
-4. Create your cluster and nodes 
-   ```sh
-   eksctl create cluster --name cluster-name  \
-   --region region-name \
-   --node-type instance-type \
-   --nodes-min 2 \
-   --nodes-max 2 \ 
-   --zones <AZ-1>,<AZ-2>
-   
-   example:
-   eksctl create cluster --name naresh \
-      --region us-east-1 \
-   --node-type t2.small \
+AWS EKS Setup
+1. Setup kubectl
+a. Download kubectl (Version 1.20)
+curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
+
+b. Grant execution permission
+chmod +x kubectl
+
+c. Move kubectl to /usr/local/bin
+sudo mv kubectl /usr/local/bin/
+
+d. Verify installation
+kubectl version --short --client
+
+2. Setup eksctl
+a. Download and extract latest release
+curl --silent --location "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" | tar xz -C /tmp
+
+b. Move binary to /usr/local/bin
+sudo mv /tmp/eksctl /usr/local/bin/
+
+c. Verify installation
+eksctl version
+
+3. Create IAM Role and Attach to EC2 Instance
+
+Note: Create IAM user with programmatic access if your bootstrap system is outside AWS.
+
+IAM user should have access to:
+
+IAM
+
+EC2
+
+VPC
+
+CloudFormation
+
+Attach this IAM role to your EC2 instance.
+
+4. Create Your Cluster and Nodes
+Generic Command
+eksctl create cluster \
+  --name cluster-name \
+  --region region-name \
+  --node-type instance-type \
+  --nodes-min 2 \
+  --nodes-max 2 \
+  --zones <AZ-1>,<AZ-2>
+
+Example
+eksctl create cluster \
+  --name naresh \
+  --region us-east-1 \
+  --node-type t2.small \
+  --nodes-min 2 \
+  --nodes-max 2
+
+5. Delete the EKS Cluster
+eksctl delete cluster --name naresh --region ap-south-1
+
+6. Validate Your Cluster
+
+Check nodes:
+
+kubectl get nodes
 
 
-5. To delete the EKS clsuter 
-   ```sh 
-   eksctl delete cluster naresh --region ap-south-1
-   ```
-   
-6. Validate your cluster using by creating by checking nodes and by creating a pod 
-   ```sh 
-   kubectl get nodes
-   ```
+Create a test pod:
+
+kubectl run test-pod --image=nginx
 
 
+Check pods:
 
-------- Docker and Minikube install process-----
+kubectl get pods
 
-choose instance t2.medium    --2cpu 2gb ram required 
-sudo dnf install docker -y   -----Install Docker first
+Docker and Minikube Install Process
+EC2 Instance Requirement
 
-sudo systemctl start docker.service ---to start thr docker service
+Choose:
 
-sudo systemctl enable docker.service  --- to enable docker
+t2.medium  (2 CPU, 2GB RAM required)
 
-sudo usermod -a -G docker ec2-user  --- to add the user ec2-user to the docker group 
+Install Docker
+Install Docker
+sudo dnf install docker -y
 
-newgrp docker --to run new group make changes immediatly  
+Start Docker Service
+sudo systemctl start docker.service
 
- 
- ------Minikube ------
+Enable Docker Service
+sudo systemctl enable docker.service
 
+Add ec2-user to Docker Group
+sudo usermod -aG docker ec2-user
+
+Apply group changes immediately
+newgrp docker
+
+Install Minikube
+Download Minikube
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
 
+Install Minikube
 sudo install minikube-linux-amd64 /usr/local/bin/minikube
 
-to start minikube ---minikube start 
-to check status ----minikube status 
+Start Minikube
+minikube start
 
+Check Status
+minikube status
 
-----------kubectl-----------
+Install kubectl (General Kubernetes Setup)
+Download kubectl
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
 
-chmod +x ./kubectl  -----Make the kubectl binary executable
+Make kubectl executable
+chmod +x kubectl
 
-sudo mv ./kubectl /usr/local/bin/kubectl  ----sudo mv ./kubectl /usr/local/bin/kubectl
+Move to /usr/local/bin
+sudo mv kubectl /usr/local/bin/kubectl
