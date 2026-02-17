@@ -1,20 +1,28 @@
 # 🚀 Setup Kubernetes on Amazon EKS (EKS + Docker + Minikube)
 
-You can follow the official AWS documentation here:  
+This guide explains how to set up:
+
+- Amazon EKS Cluster
+- kubectl
+- eksctl
+- Docker
+- Minikube
+
+Official AWS Documentation:  
 https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html
 
 ---
 
-## 📌 Pre-requisites
+# 📌 Pre-Requisites
 
-- An EC2 Instance
+- EC2 Instance
 - IAM Role attached to EC2 with permissions:
   - IAM
   - EC2
   - VPC
   - CloudFormation
 
-> Note: If your bootstrap system is outside AWS, create an IAM user with programmatic access.
+> ⚠ If your bootstrap system is outside AWS, create an IAM user with programmatic access.
 
 ---
 
@@ -25,36 +33,71 @@ https://docs.aws.amazon.com/eks/latest/userguide/getting-started-eksctl.html
 ## 1️⃣ Install kubectl (For EKS)
 
 ### Download kubectl
+
 ```sh
 curl -o kubectl https://amazon-eks.s3.us-west-2.amazonaws.com/1.19.6/2021-01-05/bin/linux/amd64/kubectl
-Make it executable
+```
+
+### Make kubectl executable
+
+```sh
 chmod +x kubectl
-Move to system path
+```
+
+### Move to system path
+
+```sh
 sudo mv kubectl /usr/local/bin/
-Verify installation
+```
+
+### Verify installation
+
+```sh
 kubectl version --short --client
-2️⃣ Install eksctl
-Download latest release
+```
+
+---
+
+## 2️⃣ Install eksctl
+
+### Download and extract latest release
+
+```sh
 curl --silent --location \
 "https://github.com/weaveworks/eksctl/releases/latest/download/eksctl_$(uname -s)_amd64.tar.gz" \
 | tar xz -C /tmp
-Move binary
+```
+
+### Move binary
+
+```sh
 sudo mv /tmp/eksctl /usr/local/bin/
-Verify installation
+```
+
+### Verify installation
+
+```sh
 eksctl version
-3️⃣ Create IAM Role
-Attach an IAM Role to your EC2 instance with the following permissions:
+```
 
-IAM
+---
 
-EC2
+## 3️⃣ Create IAM Role
 
-VPC
+Attach IAM Role to EC2 instance with access to:
 
-CloudFormation
+- IAM
+- EC2
+- VPC
+- CloudFormation
 
-4️⃣ Create EKS Cluster
-Generic Command
+---
+
+## 4️⃣ Create EKS Cluster
+
+### Generic Command
+
+```sh
 eksctl create cluster \
   --name <cluster-name> \
   --region <region-name> \
@@ -62,61 +105,184 @@ eksctl create cluster \
   --nodes-min 2 \
   --nodes-max 2 \
   --zones <AZ-1>,<AZ-2>
-Example
+```
+
+### Example
+
+```sh
 eksctl create cluster \
   --name naresh \
   --region us-east-1 \
   --node-type t2.small \
   --nodes-min 2 \
   --nodes-max 2
-Cluster creation takes approximately 10–15 minutes.
+```
 
-5️⃣ Validate Cluster
-Check Nodes
+> ⏳ Cluster creation may take 10–15 minutes.
+
+---
+
+## 5️⃣ Validate Cluster
+
+### Check Nodes
+
+```sh
 kubectl get nodes
-Create Test Pod
+```
+
+### Create Test Pod
+
+```sh
 kubectl run test-pod --image=nginx
-Check Pods
+```
+
+### Check Pods
+
+```sh
 kubectl get pods
-6️⃣ Delete EKS Cluster
+```
+
+---
+
+## 6️⃣ Delete EKS Cluster
+
+```sh
 eksctl delete cluster --name naresh --region ap-south-1
-🐳 Docker + Minikube Setup (Local Kubernetes)
-EC2 Instance Requirement
-t2.medium  (Minimum 2 CPU, 2GB RAM required)
-🐳 Install Docker
-Install Docker
+```
+
+---
+
+# 🐳 Docker + Minikube Setup (Local Kubernetes)
+
+---
+
+## EC2 Instance Requirement
+
+```
+t2.medium (Minimum 2 CPU, 2GB RAM required)
+```
+
+---
+
+# 🐳 Install Docker
+
+### Install Docker
+
+```sh
 sudo dnf install docker -y
-Start Docker Service
+```
+
+### Start Docker Service
+
+```sh
 sudo systemctl start docker.service
-Enable Docker Service
+```
+
+### Enable Docker Service
+
+```sh
 sudo systemctl enable docker.service
-Add ec2-user to Docker Group
+```
+
+### Add ec2-user to Docker group
+
+```sh
 sudo usermod -aG docker ec2-user
-Apply Group Changes
+```
+
+### Apply group changes immediately
+
+```sh
 newgrp docker
-Verify Docker
+```
+
+### Verify Docker
+
+```sh
 docker --version
 docker ps
-🚀 Install Minikube
-Download Minikube
+```
+
+---
+
+# 🚀 Install Minikube
+
+### Download Minikube
+
+```sh
 curl -LO https://storage.googleapis.com/minikube/releases/latest/minikube-linux-amd64
-Install Minikube
+```
+
+### Install Minikube
+
+```sh
 sudo install minikube-linux-amd64 /usr/local/bin/minikube
-Start Minikube
+```
+
+### Start Minikube
+
+```sh
 minikube start
-Check Status
+```
+
+### Check Status
+
+```sh
 minikube status
-📦 Install kubectl (General Kubernetes Setup)
-Download kubectl
+```
+
+---
+
+# 📦 Install kubectl (General Kubernetes Setup)
+
+### Download kubectl
+
+```sh
 curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
-Make Executable
+```
+
+### Make kubectl executable
+
+```sh
 chmod +x kubectl
-Move to Path
+```
+
+### Move to system path
+
+```sh
 sudo mv kubectl /usr/local/bin/kubectl
-Verify
+```
+
+### Verify
+
+```sh
 kubectl version --client
-✅ Final Verification Commands
+```
+
+---
+
+# ✅ Final Verification
+
+```sh
 kubectl get nodes
 kubectl get pods
 minikube status
 docker ps
+```
+
+---
+
+# 🎯 Summary
+
+You have successfully learned how to:
+
+- Install kubectl
+- Install eksctl
+- Create and delete EKS cluster
+- Install Docker
+- Install Minikube
+- Run Kubernetes locally and on AWS
+
+---
+
+⭐ Happy Learning DevOps!
